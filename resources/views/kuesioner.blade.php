@@ -3,124 +3,189 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Kuesioner Ketahanan Pangan | SP-KETAPANG</title>
+  <title>Kuesioner | SP-KETAPANG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 text-gray-800">
 
-  <!-- HEADER -->
-  <header class="bg-green-700 text-white py-10">
-    <div class="max-w-5xl mx-auto px-6">
-      <h1 class="text-3xl font-bold mb-2">
-        Kuesioner Ketahanan Pangan Rumah Tangga
+  <div class="max-w-3xl mx-auto px-6 py-12">
+
+    <!-- HEADER -->
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-bold text-green-700 mb-2">
+        Kuesioner Ketahanan Pangan
       </h1>
-      <p class="text-green-100">
-        Silakan jawab pertanyaan berikut sesuai dengan kondisi rumah tangga Anda.
+      <p class="text-gray-600">
+        Jawab pertanyaan berikut sesuai kondisi rumah tangga Anda
       </p>
     </div>
-  </header>
 
-  <!-- FORM -->
-  <main class="py-12">
-    <div class="max-w-3xl mx-auto px-6">
-      <div class="bg-white shadow-md rounded-xl p-8">
+    <!-- PROGRESS -->
+    <div class="mb-8">
+      <div class="flex justify-between text-sm text-gray-600 mb-2">
+        <span id="progressText">Pertanyaan 1 / {{ count($questions) }}</span>
+        <span>{{ count($questions) }} Pertanyaan</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="progressBar"
+          class="bg-green-600 h-2 rounded-full transition-all duration-300"
+          style="width: {{ 100 / count($questions) }}%">
+        </div>
+      </div>
+    </div>
 
-        <form method="POST" action="/kuesioner/proses">
-          @csrf
+    <!-- FORM -->
+    <form action="{{ url('/kuesioner/proses') }}" method="POST" id="quizForm">
+      @csrf
 
-          @foreach($questions as $q)
-          <div class="mb-6">
-            <label class="block font-semibold mb-2">
-              {{ $loop->iteration }}. {{ $q->pertanyaan }}
-            </label>
+      @foreach ($questions as $index => $q)
+      <div class="question-step {{ $index === 0 ? '' : 'hidden' }}"
+        data-step="{{ $index + 1 }}">
 
-            <select
+        <!-- PERTANYAAN -->
+        <h2 class="text-2xl font-semibold mb-6">
+          {{ $index + 1 }}. {{ $q->pertanyaan }}
+        </h2>
+
+        <!-- OPSI -->
+        <!-- OPSI -->
+        <div class="space-y-4">
+          @foreach($opsiJawaban[$q->kode] ?? [] as $value => $label)
+          <label
+            class="flex items-center gap-4 p-4 border border-gray-300 rounded-xl
+             cursor-pointer transition-all
+             hover:border-green-500 hover:bg-green-50
+             active:scale-[0.99]">
+
+            <input
+              type="radio"
               name="{{ $q->kode }}"
+              value="{{ $value }}"
               required
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-600">
-              <option value="">-- Pilih Jawaban --</option>
+              class="peer hidden">
 
-              @if($q->kode == 'pendapatan')
-              <option value="RENDAH">Rendah</option>
-              <option value="CUKUP">Cukup</option>
-              <option value="TINGGI">Tinggi</option>
+            <!-- RADIO BULAT -->
+            <div
+              class="w-5 h-5 rounded-full border-2 border-gray-300
+               flex items-center justify-center
+               peer-checked:border-green-600">
+              <div
+                class="w-3 h-3 rounded-full bg-green-600 hidden
+                 peer-checked:block"></div>
+            </div>
 
-              @elseif($q->kode == 'pangsa_pangan')
-              <option value="TINGGI">≥ 60%</option>
-              <option value="RENDAH">&lt; 60%</option>
-
-              @elseif($q->kode == 'pengeluaran_pangan')
-              <option value="TINGGI">Tinggi</option>
-              <option value="RENDAH">Rendah</option>
-
-              @elseif($q->kode == 'konsumsi')
-              <option value="RENDAH">Rendah</option>
-              <option value="CUKUP">Cukup</option>
-
-              @elseif($q->kode == 'energi' || $q->kode == 'protein')
-              <option value="KURANG">Kurang</option>
-              <option value="CUKUP">Cukup</option>
-
-              @elseif($q->kode == 'anggota')
-              <option value="SEDIKIT">Sedikit (≤ 4 orang)</option>
-              <option value="BANYAK">Banyak (&gt; 4 orang)</option>
-
-              @elseif($q->kode == 'coping')
-              <option value="RENDAH">Rendah</option>
-              <option value="SEDANG">Sedang</option>
-              <option value="TINGGI">Tinggi</option>
-
-              @elseif($q->kode == 'frekuensi_makan')
-              <option value="CUKUP">≥ 3 kali sehari</option>
-              <option value="KURANG">&lt; 3 kali sehari</option>
-
-              @elseif($q->kode == 'cadangan_pangan')
-              <option value="ADA">Ada</option>
-              <option value="TIDAK">Tidak Ada</option>
-
-              @elseif($q->kode == 'akses_pangan')
-              <option value="MUDAH">Mudah</option>
-              <option value="SULIT">Sulit</option>
-
-              @elseif($q->kode == 'bantuan')
-              <option value="ADA">Ya</option>
-              <option value="TIDAK">Tidak</option>
-              @endif
-            </select>
-          </div>
+            <!-- TEKS -->
+            <span class="text-gray-800 text-base">
+              {{ $label }}
+            </span>
+          </label>
           @endforeach
+        </div>
 
-          <!-- SUBMIT -->
-          <div class="mt-8 text-center">
-            <button
-              type="submit"
-              class="bg-green-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-800 transition">
-              Proses Analisis
-            </button>
-          </div>
-        </form>
+
+
+
+      </div>
+      @endforeach
+
+      <!-- NAVIGATION -->
+      <!-- NAVIGATION -->
+      <div class="flex flex-col gap-4 mt-10">
+
+        <!-- NAV STEP -->
+        <div class="flex justify-between">
+          <button type="button"
+            id="prevBtn"
+            class="px-6 py-3 rounded-lg border border-gray-300
+             text-gray-600 hover:bg-gray-100 hidden">
+            Kembali
+          </button>
+
+          <button type="button"
+            id="nextBtn"
+            class="ml-auto px-6 py-3 rounded-lg
+             bg-green-700 text-white
+             hover:bg-green-800">
+            Selanjutnya
+          </button>
+
+          <button type="submit"
+            id="submitBtn"
+            class="ml-auto px-6 py-3 rounded-lg
+             bg-green-700 text-white
+             hover:bg-green-800 hidden">
+            Lihat Hasil
+          </button>
+        </div>
+
+        <!-- BACK TO HOME -->
+        <div class="text-center">
+          <a href="{{ url('/') }}"
+            class="inline-flex items-center gap-2
+             text-sm text-gray-500 hover:text-green-700
+             transition">
+            ← Kembali ke Beranda
+          </a>
+        </div>
 
       </div>
 
-      <!-- BACK LINK -->
-      <div class="text-center mt-6">
-        <a href="/" class="text-green-700 hover:underline text-sm">
-          ← Kembali ke Beranda
-        </a>
-      </div>
-    </div>
-  </main>
+    </form>
 
-  <!-- FOOTER -->
-  <footer class="bg-gray-800 text-gray-300 py-6 mt-12">
-    <div class="max-w-5xl mx-auto px-6 text-center text-sm">
-      © {{ date('Y') }} SP-KETAPANG — Sistem Pakar Ketahanan Pangan Rumah Tangga
-    </div>
-  </footer>
+  </div>
+  <x-footer />
+
+
+  <!-- SCRIPT STEP -->
+  <script>
+    const steps = document.querySelectorAll('.question-step');
+    const totalSteps = steps.length;
+    let currentStep = 0;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+
+    function updateUI() {
+      steps.forEach((step, index) => {
+        step.classList.toggle('hidden', index !== currentStep);
+      });
+
+      progressText.innerText = `Pertanyaan ${currentStep + 1} / ${totalSteps}`;
+      progressBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
+
+      prevBtn.classList.toggle('hidden', currentStep === 0);
+      nextBtn.classList.toggle('hidden', currentStep === totalSteps - 1);
+      submitBtn.classList.toggle('hidden', currentStep !== totalSteps - 1);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      const currentQuestion = steps[currentStep];
+      const checked = currentQuestion.querySelector('input[type="radio"]:checked');
+
+      if (!checked) {
+        alert('Silakan pilih salah satu jawaban.');
+        return;
+      }
+
+      currentStep++;
+      updateUI();
+    });
+
+
+
+    prevBtn.addEventListener('click', () => {
+      currentStep--;
+      updateUI();
+    });
+  </script>
+
 
 </body>
 

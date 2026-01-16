@@ -12,6 +12,7 @@ class Fact extends Model
   protected $table = 'facts';
 
   protected $fillable = [
+    'session_id',
     'kode',
     'nilai'
   ];

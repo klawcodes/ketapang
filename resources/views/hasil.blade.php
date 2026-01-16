@@ -10,11 +10,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gradient-to-br from-green-100 via-white to-green-50 min-h-screen text-gray-800">
 
   <!-- HEADER -->
-  <header class="bg-green-700 text-white py-10">
-    <div class="max-w-5xl mx-auto px-6">
+  <header class="bg-gradient-to-r from-green-700 to-green-500 text-white py-12">
+    <div class="max-w-6xl mx-auto px-6">
       <h1 class="text-3xl font-bold mb-2">
         Hasil Analisis Ketahanan Pangan
       </h1>
@@ -25,63 +25,131 @@
   </header>
 
   <!-- CONTENT -->
-  <main class="py-12">
-    <div class="max-w-3xl mx-auto px-6 space-y-8">
+  <main class="py-16">
+    <div class="max-w-5xl mx-auto px-6 space-y-10">
 
-      <!-- HASIL UTAMA -->
-      <div class="bg-white shadow-md rounded-xl p-8 text-center">
-        <h2 class="text-xl font-semibold mb-4">
+      @php
+      $ranking = collect($skorAkhir)
+      ->sortDesc()
+      ->map(fn($v) => number_format($v * 100, 2))
+      ->toArray();
+
+      $labels = array_keys($ranking);
+      $values = array_values($ranking);
+      @endphp
+
+      <!-- PODIUM -->
+      <div class="bg-white rounded-3xl shadow-xl p-10">
+        <h2 class="text-xl font-semibold text-center mb-10">
           Kesimpulan Sistem Pakar
         </h2>
 
-        <p class="text-3xl font-bold text-green-700 mb-2">
-          {{ $kesimpulan }}
-        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
 
-        <p class="text-gray-600">
-          Tingkat Keyakinan Sistem (Certainty Factor)
-        </p>
+          <!-- RANK 2 -->
+          @if(isset($labels[1]) && count($labels) >= 3)
+          <div class="text-center">
+            <div class="bg-green-100 rounded-2xl py-8">
+              <p class="text-4xl font-bold text-green-700">2</p>
+              <p class="font-semibold mt-3">{{ $labels[1] }}</p>
+              <p class="text-sm text-gray-600">{{ $values[1] }}%</p>
+            </div>
+          </div>
+          @endif
 
-        <p class="text-2xl font-semibold mt-2">
-          {{ $confidence }}%
-        </p>
+          <!-- RANK 1 -->
+          <div class="text-center scale-105">
+            <div class="bg-gradient-to-br from-green-600 to-green-400 text-white rounded-3xl py-12 shadow-lg">
+              <p class="text-5xl font-extrabold">1</p>
+              <p class="text-lg font-bold mt-4">{{ $labels[0] }}</p>
+              <p class="text-base opacity-90 mt-1">{{ $values[0] }}%</p>
+            </div>
+          </div>
+
+          <!-- RANK 3 -->
+          @if(isset($labels[2]))
+          <div class="text-center">
+            <div class="bg-green-100 rounded-2xl py-8">
+              <p class="text-4xl font-bold text-green-700">3</p>
+              <p class="font-semibold mt-3">{{ $labels[2] }}</p>
+              <p class="text-sm text-gray-600">{{ $values[2] }}%</p>
+            </div>
+          </div>
+          @endif
+
+        </div>
       </div>
 
-      <!-- PENJELASAN -->
-      <div class="bg-white shadow-md rounded-xl p-8">
-        <h3 class="text-xl font-semibold mb-4">
-          Penjelasan Hasil
-        </h3>
+      <!-- Tambahkan peringatan jika ada ambiguitas -->
+      @php
+      // Hitung selisih antara peringkat 1 dan 2
+      $selisih = isset($values[1]) ? ($values[0] - $values[1]) : 0;
+      @endphp
 
-        <p class="text-gray-700 leading-relaxed text-justify">
-          {{ $narasi }}
-        </p>
+      @if($selisih < 5) {{-- Jika selisih kurang dari 5% --}}
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-yellow-700">
+              <strong>Perhatian:</strong> Hasil analisis menunjukkan beberapa kategori dengan tingkat keyakinan yang hampir sama.
+              Sistem memilih <strong>{{ $labels[0] }}</strong> sebagai kesimpulan utama berdasarkan tingkat keyakinan tertinggi.
+            </p>
+          </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- DETAIL PROGRESS -->
+    <div class="bg-white rounded-3xl shadow-xl p-10">
+      <h3 class="text-lg font-semibold mb-6">
+        Tingkat Keyakinan Setiap Kesimpulan
+      </h3>
+
+      <div class="space-y-5">
+        @foreach($ranking as $label => $val)
+        <div>
+          <div class="flex justify-between mb-1 text-sm font-medium">
+            <span>{{ $label }}</span>
+            <span>{{ $val }}%</span>
+          </div>
+          <div class="w-full bg-green-100 rounded-full h-3 overflow-hidden">
+            <div
+              class="bg-gradient-to-r from-green-500 to-green-400 h-3 rounded-full transition-all duration-700"
+              style="width: {{ $val }}%">
+            </div>
+          </div>
+        </div>
+        @endforeach
       </div>
+    </div>
 
-      <!-- ACTION BUTTON -->
-      <div class="flex flex-col md:flex-row gap-4 justify-center">
-        <a
-          href="/quiz"
-          class="bg-green-700 text-white px-6 py-3 rounded-lg text-center font-semibold hover:bg-green-800 transition">
-          Ulangi Kuesioner
-        </a>
+    <!-- NARASI -->
+    <div class="bg-white rounded-3xl shadow-xl p-10 text-gray-700 leading-relaxed text-justify">
+      {{ $narasi }}
+    </div>
 
-        <a
-          href="/"
-          class="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg text-center font-semibold hover:bg-gray-300 transition">
-          Kembali ke Beranda
-        </a>
-      </div>
+    <!-- ACTION -->
+    <div class="flex flex-col md:flex-row gap-4 justify-center">
+      <a href="/quiz"
+        class="bg-green-600 text-white px-8 py-4 rounded-xl text-center font-semibold hover:bg-green-700 transition">
+        Ulangi Kuesioner
+      </a>
+
+      <a href="/"
+        class="bg-gray-200 text-gray-800 px-8 py-4 rounded-xl text-center font-semibold hover:bg-gray-300 transition">
+        Kembali ke Beranda
+      </a>
+    </div>
 
     </div>
   </main>
 
   <!-- FOOTER -->
-  <footer class="bg-gray-800 text-gray-300 py-6 mt-12">
-    <div class="max-w-5xl mx-auto px-6 text-center text-sm">
-      © {{ date('Y') }} SP-KETAPANG — Sistem Pakar Ketahanan Pangan Rumah Tangga
-    </div>
-  </footer>
+  <x-footer />
+
 
 </body>
 
