@@ -48,7 +48,7 @@
 
           <!-- RANK 2 -->
           @if(isset($labels[1]) && count($labels) >= 3)
-          <div class="text-center">
+          <div class="text-center order-2 md:order-1">
             <div class="bg-green-100 rounded-2xl py-8">
               <p class="text-4xl font-bold text-green-700">2</p>
               <p class="font-semibold mt-3">{{ $labels[1] }}</p>
@@ -58,7 +58,7 @@
           @endif
 
           <!-- RANK 1 -->
-          <div class="text-center scale-105">
+          <div class="text-center scale-105 order-1 md:order-2">
             <div class="bg-gradient-to-br from-green-600 to-green-400 text-white rounded-3xl py-12 shadow-lg">
               <p class="text-5xl font-extrabold">1</p>
               <p class="text-lg font-bold mt-4">{{ $labels[0] }}</p>
@@ -68,7 +68,7 @@
 
           <!-- RANK 3 -->
           @if(isset($labels[2]))
-          <div class="text-center">
+          <div class="text-center order-3 md:order-3">
             <div class="bg-green-100 rounded-2xl py-8">
               <p class="text-4xl font-bold text-green-700">3</p>
               <p class="font-semibold mt-3">{{ $labels[2] }}</p>
@@ -78,6 +78,7 @@
           @endif
 
         </div>
+
       </div>
 
       <!-- Tambahkan peringatan jika ada ambiguitas -->

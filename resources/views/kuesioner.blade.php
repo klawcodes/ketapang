@@ -70,9 +70,11 @@
 
             <!-- RADIO BULAT -->
             <div
-              class="w-5 h-5 rounded-full border-2 border-gray-300
-               flex items-center justify-center
-               peer-checked:border-green-600">
+              class="w-5 h-5 rounded-full
+              bg-gray-200
+              transition-all
+              peer-checked:bg-green-600
+              peer-checked:scale-110">
               <div
                 class="w-3 h-3 rounded-full bg-green-600 hidden
                  peer-checked:block"></div>
